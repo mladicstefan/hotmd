@@ -18,18 +18,23 @@ fn watch_file(path: &Path) -> Result<(), Box<dyn Error>> {
     let mut watcher = notify::recommended_watcher(tx)?;
     watcher.watch(path, RecursiveMode::Recursive)?;
 
-    for res in rx {
-        match res {
+    loop {
+        match rx.recv() {
             Ok(event) => println!("File changed: {:?}", event),
             Err(e) => eprintln!("Watch error: {:?}", e),
         }
     }
-    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let cli = Args::parse();
-    println!("{:?}", cli);
-    watch_file(Path::new(&cli.file))?;
+
+    let filepath = Path::new(&cli.file);
+    if !filepath.exists() {
+        eprintln!("file not found {:?}", filepath);
+        std::process::exit(1);
+    }
+
+    watch_file(filepath)?;
     Ok(())
 }
