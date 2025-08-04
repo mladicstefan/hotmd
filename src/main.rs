@@ -1,40 +1,14 @@
-use clap::Parser;
-use notify::{RecursiveMode, Watcher};
-use std::error::Error;
-use std::path::Path;
-use std::sync::mpsc;
+use std::io;
+use tokio::{io::AsyncReadExt, net::TcpListener};
 
-#[derive(Parser, Debug)]
-#[command(name = "hotmd")]
-#[command(about = "Live Markdown to HTML transpiler")]
-struct Args {
-    #[arg(short, long)]
-    file: String,
-}
+#[tokio::main]
+async fn main() -> io::Result<()> {
+    let listener = TcpListener::bind("127.0.0.1:6969").await?;
 
-fn watch_file(path: &Path) -> Result<(), Box<dyn Error>> {
-    let (tx, rx) = mpsc::channel();
-
-    let mut watcher = notify::recommended_watcher(tx)?;
-    watcher.watch(path, RecursiveMode::Recursive)?;
-
+    let mut buff: Vec<u8> = Vec::new();
     loop {
-        match rx.recv() {
-            Ok(event) => println!("File changed: {:?}", event),
-            Err(e) => eprintln!("Watch error: {:?}", e),
-        }
+        let (mut socket, _) = listener.accept().await?;
+        let incoming = socket.read(&mut buff).await?;
+        println!("{:?}", incoming);
     }
-}
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let cli = Args::parse();
-
-    let filepath = Path::new(&cli.file);
-    if !filepath.exists() {
-        eprintln!("file not found {:?}", filepath);
-        std::process::exit(1);
-    }
-
-    watch_file(filepath)?;
-    Ok(())
 }

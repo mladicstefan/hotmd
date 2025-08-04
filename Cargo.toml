@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 clap = { version = "4.5.42", features = ["derive"] }
 notify = "8.1.0"
+tokio = { version = "1.47.1", features = ["full"] }

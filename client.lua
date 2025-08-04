@@ -39,10 +39,10 @@ local function send_keystroke(key)
   end)
 end
 
-local function get_buffer_content()
-  local lines = vim.api.nvim_buf_get_lines(0,0,-1,false)
-  return table.concat(lines, '\n')
-end
+-- local function get_buffer_content()
+--   local lines = vim.api.nvim_buf_get_lines(0,0,-1,false)
+--   return table.concat(lines, '\n')
+-- end
 
 local function on_key(key)
   --only send in insert mode
@@ -51,7 +51,7 @@ local function on_key(key)
 
   print("Key pressed:", vim.inspect(key), "Mode:", vim.api.nvim_get_mode().mode)
   --TODO: FILTER KEYS 
-  if key == "\27" then return end
+  if key == "\27" then return end --do not send esc key
 
   print("Sending key to server:", vim.inspect(key))
   send_keystroke(key)
