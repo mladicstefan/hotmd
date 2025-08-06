@@ -1,7 +1,7 @@
 local socket = nil
 local connected =false
+local uv = vim.loop
 
-local uv = vim.loop --tcp server
 local config = {
   HOST = "127.0.0.1",
   PORT = 6969
@@ -38,7 +38,6 @@ local function send_keystroke(key)
     end
   end)
 end
-
 -- local function get_buffer_content()
 --   local lines = vim.api.nvim_buf_get_lines(0,0,-1,false)
 --   return table.concat(lines, '\n')
@@ -69,7 +68,11 @@ end
 local function init()
   connect()
 
-  vim.on_key(on_key)
+  local filename = vim.fn.bufname()
+  local is_md = filename:match("%.md$") ~= nil
+  if is_md then
+    vim.on_key(on_key)
+  end
   --cleanup on exit 
   -- vim.api.nvim_create_autocmd("VimLeavePre",{
   --   callback = disconnect()
